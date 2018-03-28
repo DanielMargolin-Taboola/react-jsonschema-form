@@ -110,7 +110,13 @@ export function getWidget(schema, widget, registeredWidgets = {}) {
   throw new Error(`No widget "${widget}" for type "${type}"`);
 }
 
-function computeDefaults(schema, parentDefaults, formData, definitions) {
+function computeDefaults(
+  schema,
+  parentDefaults,
+  formData,
+  definitions,
+  ignoreDefaults = {}
+) {
   if ("$ref" in schema) {
     const refParentDefaults =
       parentDefaults !== undefined ? parentDefaults : schema.default;
@@ -196,7 +202,8 @@ function computeDefaults(schema, parentDefaults, formData, definitions) {
               propSchema,
               propParentDefault,
               propFormData,
-              definitions
+              definitions,
+              ignoreDefaults[key]
             );
             return acc;
           },
@@ -212,7 +219,7 @@ function computeDefaults(schema, parentDefaults, formData, definitions) {
           computed = formData;
         } else if (parentDefaults !== undefined) {
           computed = parentDefaults;
-        } else if ("default" in schema) {
+        } else if ("default" in schema && !ignoreDefaults.changedByTheUser) {
           computed = schema.default;
         }
       }
@@ -222,14 +229,26 @@ function computeDefaults(schema, parentDefaults, formData, definitions) {
           retrieveSchema(schema, definitions, computed),
           undefined,
           computed,
-          definitions
+          definitions,
+          ignoreDefaults
         )
       : computed;
   }
 }
 
-export function getDefaultFormState(schema, formData, definitions = {}) {
-  return computeDefaults(schema, undefined, formData, definitions);
+export function getDefaultFormState(
+  schema,
+  formData,
+  definitions = {},
+  ignoreDefaults
+) {
+  return computeDefaults(
+    schema,
+    undefined,
+    formData,
+    definitions,
+    ignoreDefaults
+  );
 }
 
 export function getUiOptions(uiSchema) {
@@ -308,6 +327,18 @@ export function clearDependencies(formData = {}, schema, name) {
     }
   });
   return clearedFormData;
+}
+
+export function removeEmpty(objOrg) {
+  let obj = Object.assign({}, objOrg);
+  Object.keys(obj).forEach(key => {
+    if (obj[key] && typeof obj[key] === "object") {
+      removeEmpty(obj[key]);
+    } else if (obj[key] == null) {
+      delete obj[key];
+    }
+  });
+  return obj;
 }
 
 export function asNumber(value) {

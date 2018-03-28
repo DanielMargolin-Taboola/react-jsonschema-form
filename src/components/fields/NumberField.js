@@ -8,7 +8,9 @@ function NumberField(props) {
   return (
     <StringField
       {...props}
-      onChange={value => props.onChange(asNumber(value))}
+      onChange={(value, changedByTheUser) => {
+        return props.onChange(asNumber(value), changedByTheUser);
+      }}
     />
   );
 }
