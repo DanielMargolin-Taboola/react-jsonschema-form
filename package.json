@@ -1,7 +1,10 @@
 {
-  "name": "react-jsonschema-form",
-  "version": "2.0.2",
+  "name": "react-jsonschema-form-taboola",
+  "version": "1.0.3",
   "description": "A simple React component capable of building HTML forms out of a JSON schema.",
+  "publishConfig": {
+    "registry": "https://artifactory.taboolasyndication.com/artifactory/api/npm/npm"
+  },
   "scripts": {
     "build:readme": "toctoc README.md -w",
     "build:lib": "rimraf lib && cross-env NODE_ENV=production babel -d lib/ src/",
