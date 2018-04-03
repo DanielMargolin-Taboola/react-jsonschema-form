@@ -38,7 +38,12 @@ export default class Form extends Component {
     if (
       !deepEquals(
         removeEmpty(
-          getDefaultFormState(nextProps.schema, this.state.formData, undefined)
+          getDefaultFormState(
+            nextProps.schema,
+            this.state.formData,
+            undefined,
+            this.state.changedByTheUserObj
+          )
         ),
         removeEmpty(nextProps.formData)
       )
@@ -71,7 +76,7 @@ export default class Form extends Component {
       schema,
       props.formData,
       definitions,
-      state.changedByTheUserObject
+      state.changedByTheUserObj
     );
     const retrievedSchema = retrieveSchema(schema, definitions, formData);
     // if(!deepEquals(this.removeEmpty(props.formData),this.removeEmpty(formData))) {
