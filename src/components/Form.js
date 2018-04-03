@@ -232,7 +232,7 @@ export default class Form extends Component {
       formData,
       errorSchema,
       idSchema,
-      changedByTheUserObject,
+      changedByTheUserObj,
     } = this.state;
     const registry = this.getRegistry();
     const _SchemaField = registry.fields.SchemaField;
@@ -252,7 +252,7 @@ export default class Form extends Component {
         onSubmit={this.onSubmit}>
         <_SchemaField
           schema={schema}
-          ignoreDefaults={changedByTheUserObject}
+          ignoreDefaults={changedByTheUserObj}
           uiSchema={uiSchema}
           errorSchema={errorSchema}
           idSchema={idSchema}
