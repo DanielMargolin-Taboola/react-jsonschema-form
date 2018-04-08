@@ -156,6 +156,7 @@ function SchemaFieldRender(props) {
     idSchema,
     name,
     required,
+    ignoreDefaults,
     registry = getDefaultRegistry(),
   } = props;
   const {
@@ -256,6 +257,7 @@ function SchemaFieldRender(props) {
     fields,
     schema,
     uiSchema,
+    ignoreDefaults,
   };
 
   return <FieldTemplate {...fieldProps}>{field}</FieldTemplate>;
@@ -291,6 +293,7 @@ if (process.env.NODE_ENV !== "production") {
     uiSchema: PropTypes.object,
     idSchema: PropTypes.object,
     formData: PropTypes.any,
+    ignoreDefaults: PropTypes.any,
     errorSchema: PropTypes.object,
     registry: PropTypes.shape({
       widgets: PropTypes.objectOf(

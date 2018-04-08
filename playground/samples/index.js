@@ -17,6 +17,8 @@ import customObject from "./customObject";
 import alternatives from "./alternatives";
 import propertyDependencies from "./propertyDependencies";
 import schemaDependencies from "./schemaDependencies";
+import poc from "./poc";
+import poc1 from "./poc1";
 
 export const samples = {
   Simple: simple,
@@ -38,4 +40,6 @@ export const samples = {
   Alternatives: alternatives,
   "Property dependencies": propertyDependencies,
   "Schema dependencies": schemaDependencies,
+  poc: poc,
+  poc1: poc1,
 };

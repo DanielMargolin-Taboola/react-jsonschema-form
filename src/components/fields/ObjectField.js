@@ -6,20 +6,14 @@ import {
   retrieveSchema,
   getDefaultRegistry,
   clearDependencies,
+  toIdSchema,
 } from "../../utils";
+import validate from "../../validate";
 
 function DefaultObjectFieldTemplate(props) {
-  const { TitleField, DescriptionField } = props;
+  const { DescriptionField } = props;
   return (
     <fieldset>
-      {(props.uiSchema["ui:title"] || props.title) && (
-        <TitleField
-          id={`${props.idSchema.$id}__title`}
-          title={props.title || props.uiSchema["ui:title"]}
-          required={props.required}
-          formContext={props.formContext}
-        />
-      )}
       {props.description && (
         <DescriptionField
           id={`${props.idSchema.$id}__description`}
@@ -37,6 +31,7 @@ class ObjectField extends Component {
     uiSchema: {},
     formData: {},
     errorSchema: {},
+    ignoreDefaults: {},
     idSchema: {},
     required: false,
     disabled: false,
@@ -50,23 +45,52 @@ class ObjectField extends Component {
     );
   }
 
+  clearSchemaDependencies = (retrievedSchema, name) => {
+    return data => {
+      return clearDependencies(data, retrievedSchema, name);
+    };
+  };
+
   onPropertyChange = name => {
-    return (value, errorSchema) => {
-      const { formData, schema, onChange } = this.props;
-      let clearedFormData = clearDependencies(
+    return (
+      value,
+      changeByTheUser,
+      errorsFromChildObject,
+      checkedChildObject
+    ) => {
+      const {
         formData,
-        retrieveSchema(schema, undefined, formData),
+        schema,
+        onChange,
+        ignoreDefaults,
+        errorSchema,
+      } = this.props;
+      const retrievedSchema = retrieveSchema(schema, undefined, formData);
+      let clearObjDependencies = this.clearSchemaDependencies(
+        retrievedSchema,
         name
       );
-      const newFormData = { ...clearedFormData, [name]: value };
-      onChange(
-        newFormData,
-        errorSchema &&
-          this.props.errorSchema && {
-            ...this.props.errorSchema,
-            [name]: errorSchema,
-          }
-      );
+
+      let clearedChangedByTheUser = clearObjDependencies(ignoreDefaults);
+      let newIgnoreDefaults = {
+        ...clearedChangedByTheUser,
+        [name]: changeByTheUser,
+      };
+
+      let clearedFormData = clearObjDependencies(formData);
+      let newFormData = { ...clearedFormData, [name]: value };
+
+      let errors = checkedChildObject
+        ? { [name]: errorsFromChildObject }
+        : {
+            [name]: validate(newFormData, schema).errorSchema[name] || {
+              __errors: [],
+            },
+          };
+      let clearedErrors = clearObjDependencies(errorSchema);
+      let newErrors = { ...clearedErrors, ...errors };
+
+      onChange(newFormData, newIgnoreDefaults, newErrors, true);
     };
   };
 
@@ -81,12 +105,19 @@ class ObjectField extends Component {
       disabled,
       readonly,
       onBlur,
+      ignoreDefaults,
       onFocus,
       registry = getDefaultRegistry(),
     } = this.props;
     const { definitions, fields, formContext } = registry;
     const { SchemaField, TitleField, DescriptionField } = fields;
     const schema = retrieveSchema(this.props.schema, definitions, formData);
+    const newIdSchema = toIdSchema(
+      schema,
+      idSchema["$id"],
+      definitions,
+      idSchema["$id"]
+    );
     const title = schema.title === undefined ? name : schema.title;
     const description = uiSchema["ui:description"] || schema.description;
     let orderedProperties;
@@ -123,8 +154,9 @@ class ObjectField extends Component {
               schema={schema.properties[name]}
               uiSchema={uiSchema[name]}
               errorSchema={errorSchema[name]}
-              idSchema={idSchema[name]}
+              idSchema={newIdSchema[name]}
               formData={formData[name]}
+              ignoreDefaults={ignoreDefaults[name]}
               onChange={this.onPropertyChange(name)}
               onBlur={onBlur}
               onFocus={onFocus}
