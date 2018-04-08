@@ -13,7 +13,6 @@ import {
   removeEmpty,
 } from "../utils";
 import validateFormData from "../validate";
-import _ from "lodash";
 
 export default class Form extends Component {
   static defaultProps = {
@@ -48,19 +47,9 @@ export default class Form extends Component {
         removeEmpty(nextProps.formData)
       )
     ) {
-      console.log("not equals****************");
-      console.log(
-        _.pickBy(
-          getDefaultFormState(nextProps.schema, this.state.formData, undefined),
-          _.identity
-        )
-      );
-      console.log(_.pickBy(nextProps.formData, _.identity));
       this.setState(this.getStateFromProps(nextProps), () => {
         this.props.onChange({ formData: this.state.formData });
       });
-    } else {
-      console.log("equals");
     }
   }
 
@@ -141,7 +130,14 @@ export default class Form extends Component {
 
   onChange = (formData, changedByTheUserObj, errorSchema) => {
     const mustValidate = !this.props.noValidate && this.props.liveValidate;
-    let state = { formData, changedByTheUserObj };
+    const idSchema = toIdSchema(
+      retrieveSchema(this.props.schema, undefined, formData),
+      this.props.uiSchema["ui:rootFieldId"],
+      undefined,
+      formData,
+      this.props.idPrefix
+    );
+    let state = { formData, changedByTheUserObj, idSchema };
     if (mustValidate) {
       state = { ...state, errorSchema: errorSchema };
     } // } else if (!this.props.noValidate && newErrorSchema) {
