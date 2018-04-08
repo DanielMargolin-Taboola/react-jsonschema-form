@@ -6,6 +6,7 @@ import {
   retrieveSchema,
   getDefaultRegistry,
   clearDependencies,
+  toIdSchema,
 } from "../../utils";
 import validate from "../../validate";
 
@@ -111,6 +112,12 @@ class ObjectField extends Component {
     const { definitions, fields, formContext } = registry;
     const { SchemaField, TitleField, DescriptionField } = fields;
     const schema = retrieveSchema(this.props.schema, definitions, formData);
+    const newIdSchema = toIdSchema(
+      schema,
+      idSchema["$id"],
+      definitions,
+      idSchema["$id"]
+    );
     const title = schema.title === undefined ? name : schema.title;
     const description = uiSchema["ui:description"] || schema.description;
     let orderedProperties;
@@ -147,7 +154,7 @@ class ObjectField extends Component {
               schema={schema.properties[name]}
               uiSchema={uiSchema[name]}
               errorSchema={errorSchema[name]}
-              idSchema={idSchema[name]}
+              idSchema={newIdSchema[name]}
               formData={formData[name]}
               ignoreDefaults={ignoreDefaults[name]}
               onChange={this.onPropertyChange(name)}
