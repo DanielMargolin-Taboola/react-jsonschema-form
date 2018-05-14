@@ -7,9 +7,10 @@ import { asNumber } from "../../utils";
  * This is a silly limitation in the DOM where option change event values are
  * always retrieved as strings.
  */
-function processValue({ type, items }, value) {
+function processValue({ type, items }, value, emptyValue) {
+  console.log(value, emptyValue);
   if (value === "") {
-    return undefined;
+    return emptyValue;
   } else if (
     type === "array" &&
     items &&
@@ -51,14 +52,18 @@ function SelectWidget(props) {
     onFocus,
     placeholder,
   } = props;
-  const { enumOptions, enumDisabled } = options;
-  const emptyValue = multiple ? [] : "";
+  const { enumOptions, enumDisabled, emptyValue } = options;
+  const emptyStringValue = multiple ? [] : "";
   return (
     <select
       id={id}
       multiple={multiple}
       className="form-control"
-      value={typeof value === "undefined" ? emptyValue : value}
+      value={
+        typeof value === "undefined" || value === null
+          ? emptyStringValue
+          : value
+      }
       required={required}
       disabled={disabled || readonly}
       autoFocus={autofocus}
@@ -66,19 +71,19 @@ function SelectWidget(props) {
         onBlur &&
         (event => {
           const newValue = getValue(event, multiple);
-          onBlur(id, processValue(schema, newValue));
+          onBlur(id, processValue(schema, newValue, emptyValue));
         })
       }
       onFocus={
         onFocus &&
         (event => {
           const newValue = getValue(event, multiple);
-          onFocus(id, processValue(schema, newValue));
+          onFocus(id, processValue(schema, newValue, emptyValue));
         })
       }
       onChange={event => {
         const newValue = getValue(event, multiple);
-        onChange(processValue(schema, newValue));
+        onChange(processValue(schema, newValue, emptyValue));
       }}>
       {!multiple && !schema.default && <option value="">{placeholder}</option>}
       {enumOptions.map(({ value, label }, i) => {

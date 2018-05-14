@@ -6,7 +6,7 @@ function HiddenWidget({ id, value }) {
     <input
       type="hidden"
       id={id}
-      value={typeof value === "undefined" ? "" : value}
+      value={typeof value === "undefined" || value === null ? "" : value}
     />
   );
 }
