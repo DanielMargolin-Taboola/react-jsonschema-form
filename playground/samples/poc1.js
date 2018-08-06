@@ -41,13 +41,14 @@ module.exports = {
             },
           },
           {
+            required: ["rule bucket order"],
             properties: {
               preset: {
                 enum: ["Video"],
               },
               "rule bucket order": {
                 type: "number",
-                default: 1000,
+                // default: '100q0',
                 maximum: 1100,
               },
               placement: {
@@ -60,7 +61,7 @@ module.exports = {
                   "unit type": {
                     type: "string",
                     enum: ["integrated widget", "slider"],
-                    default: "integrated widget",
+                    default: "slider",
                   },
                 },
                 dependencies: {
@@ -72,7 +73,7 @@ module.exports = {
                             enum: ["slider"],
                           },
                           tagId: {
-                            type: "string",
+                            type: "number",
                             default: "123",
                           },
                         },

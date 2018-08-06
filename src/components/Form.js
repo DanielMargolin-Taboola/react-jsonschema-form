@@ -31,6 +31,7 @@ export default class Form extends Component {
     if (!deepEquals(this.state.formData, props.formData)) {
       this.props.onChange({ formData: this.state.formData });
     }
+    this.errors = {};
   }
 
   componentWillReceiveProps(nextProps) {
@@ -50,6 +51,26 @@ export default class Form extends Component {
       this.setState(this.getStateFromProps(nextProps), () => {
         this.props.onChange({ formData: this.state.formData });
       });
+    }
+  }
+
+  updateErrors = (errors, isNestedObject) => {
+    if (isNestedObject) {
+      this.errors = Object.assign(this.errors, errors);
+    } else {
+      this.errors = errors;
+    }
+  };
+
+  componentDidMount(prevProps) {
+    if (this.props.updateErrors) {
+      this.props.updateErrors(this.errors);
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.updateErrors) {
+      this.props.updateErrors(this.errors);
     }
   }
 
@@ -114,7 +135,7 @@ export default class Form extends Component {
     const { errors, errorSchema, schema, uiSchema } = this.state;
     const { ErrorList, showErrorList, formContext } = this.props;
 
-    if (errors.length && showErrorList != false) {
+    if (errors.length && showErrorList !== false) {
       return (
         <ErrorList
           errors={errors}
@@ -128,7 +149,7 @@ export default class Form extends Component {
     return null;
   }
 
-  onChange = (formData, changedByTheUserObj, errorSchema) => {
+  onChange = (formData, changedByTheUserObj) => {
     const mustValidate = !this.props.noValidate && this.props.liveValidate;
     const idSchema = toIdSchema(
       retrieveSchema(this.props.schema, undefined, formData),
@@ -139,7 +160,7 @@ export default class Form extends Component {
     );
     let state = { formData, changedByTheUserObj, idSchema };
     if (mustValidate) {
-      state = { ...state, errorSchema: errorSchema };
+      // state = { ...state, errorSchema: errorSchema };
     } // } else if (!this.props.noValidate && newErrorSchema) {
     //   state = {
     //     ...state,
@@ -220,6 +241,7 @@ export default class Form extends Component {
       enctype,
       acceptcharset,
       noHtml5Validate,
+      updateErrors,
     } = this.props;
 
     const {
@@ -256,6 +278,7 @@ export default class Form extends Component {
           onChange={this.onChange}
           onBlur={this.onBlur}
           onFocus={this.onFocus}
+          updateErrors={updateErrors ? this.updateErrors : () => {}}
           registry={registry}
           safeRenderCompletion={safeRenderCompletion}
         />
@@ -307,5 +330,6 @@ if (process.env.NODE_ENV !== "production") {
     transformErrors: PropTypes.func,
     safeRenderCompletion: PropTypes.bool,
     formContext: PropTypes.object,
+    updateErrors: PropTypes.func,
   };
 }

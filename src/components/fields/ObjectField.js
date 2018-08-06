@@ -51,20 +51,17 @@ class ObjectField extends Component {
     };
   };
 
+  updateErrors = (errorSchema, name) => {
+    let errors = {};
+    if (Object.keys(errorSchema).length > 0) {
+      errors = name ? { [name]: errorSchema } : errorSchema;
+    }
+    this.props.updateErrors(errors, name ? true : false);
+  };
+
   onPropertyChange = name => {
-    return (
-      value,
-      changeByTheUser,
-      errorsFromChildObject,
-      checkedChildObject
-    ) => {
-      const {
-        formData,
-        schema,
-        onChange,
-        ignoreDefaults,
-        errorSchema,
-      } = this.props;
+    return (value, changeByTheUser) => {
+      const { formData, schema, onChange, ignoreDefaults } = this.props;
       const retrievedSchema = retrieveSchema(schema, undefined, formData);
       let clearObjDependencies = this.clearSchemaDependencies(
         retrievedSchema,
@@ -80,17 +77,17 @@ class ObjectField extends Component {
       let clearedFormData = clearObjDependencies(formData);
       let newFormData = { ...clearedFormData, [name]: value };
 
-      let errors = checkedChildObject
-        ? { [name]: errorsFromChildObject }
-        : {
-            [name]: validate(newFormData, schema).errorSchema[name] || {
-              __errors: [],
-            },
-          };
-      let clearedErrors = clearObjDependencies(errorSchema);
-      let newErrors = { ...clearedErrors, ...errors };
+      // let errors = checkedChildObject
+      //   ? { [name]: errorsFromChildObject }
+      //   : {
+      //       [name]: validate(newFormData, schema).errorSchema[name] || {
+      //         __errors: [],
+      //       },
+      //     };
+      // let clearedErrors = clearObjDependencies(errorSchema);
+      // let newErrors = { ...clearedErrors, ...errors };
 
-      onChange(newFormData, newIgnoreDefaults, newErrors, true);
+      onChange(newFormData, newIgnoreDefaults, true);
     };
   };
 
@@ -98,7 +95,6 @@ class ObjectField extends Component {
     const {
       uiSchema,
       formData,
-      errorSchema,
       idSchema,
       name,
       required,
@@ -136,7 +132,9 @@ class ObjectField extends Component {
         </div>
       );
     }
-
+    let errorSchemaNew = validate(formData, schema).errorSchema;
+    this.updateErrors(errorSchemaNew, name);
+    // console.log(errorSchemaNew);
     const Template = registry.ObjectFieldTemplate || DefaultObjectFieldTemplate;
 
     const templateProps = {
@@ -153,12 +151,17 @@ class ObjectField extends Component {
               required={this.isRequired(name)}
               schema={schema.properties[name]}
               uiSchema={uiSchema[name]}
-              errorSchema={errorSchema[name]}
+              errorSchema={
+                schema.properties[name].type !== "object"
+                  ? errorSchemaNew[name]
+                  : undefined
+              }
               idSchema={newIdSchema[name]}
               formData={formData[name]}
               ignoreDefaults={ignoreDefaults[name]}
               onChange={this.onPropertyChange(name)}
               onBlur={onBlur}
+              updateErrors={this.props.updateErrors}
               onFocus={onFocus}
               registry={registry}
               disabled={disabled}

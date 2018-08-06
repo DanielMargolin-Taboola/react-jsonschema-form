@@ -458,6 +458,9 @@ class App extends Component {
               liveValidate={liveValidate}
               schema={schema}
               uiSchema={uiSchema}
+              updateErrors={data => {
+                console.log(data);
+              }}
               formData={formData}
               onChange={this.onFormDataChange}
               onSubmit={({ formData }) =>
